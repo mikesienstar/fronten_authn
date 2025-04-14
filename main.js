@@ -11,7 +11,7 @@ loginButton.addEventListener("click", login)
 closeButton.addEventListener("click", () => modal.close())
 
 // const SERVER_URL = "http://localhost:3000"
-const SERVER_URL="https://figerprint-auther-backend.onrender.com"
+const SERVER_URL="https://backend-auther.onrender.com"
 
 async function signup() {
   const email = emailInput.value.trim();
