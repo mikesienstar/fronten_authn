@@ -61,42 +61,54 @@ async function signup() {
 }
 
 async function login() {
-  const email = emailInput.value
-
-  // 1. Get challenge from server
-  const initResponse = await fetch(`${SERVER_URL}/init-auth?email=${email}`, {
-    credentials: "include",
-  })
-  const options = await initResponse.json()
-  if (!initResponse.ok) {
-    showModalText(options.error)
+  const email = emailInput.value.trim();
+  if (!email) {
+    showModalText("Please enter a valid email");
+    return;
   }
 
-  // 2. Get passkey
-  const authJSON = await startAuthentication(options)
+  try {
+    // 1. Get challenge from server
+    const initResponse = await fetch(`${SERVER_URL}/init-auth?email=${encodeURIComponent(email)}`, {
+      credentials: "include",
+    });
+    
+    if (!initResponse.ok) {
+      const errorData = await initResponse.json();
+      showModalText(errorData.error || "Failed to start authentication");
+      return;
+    }
+    
+    const options = await initResponse.json();
 
-  // 3. Verify passkey with DB
-  const verifyResponse = await fetch(`${SERVER_URL}/verify-auth`, {
-    credentials: "include",
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(authJSON),
-  })
+    // 2. Get passkey
+    const authJSON = await startAuthentication(options);
 
-  const verifyData = await verifyResponse.json()
-  if (!verifyResponse.ok) {
-    showModalText(verifyData.error)
+    // 3. Verify passkey with DB
+    const verifyResponse = await fetch(`${SERVER_URL}/verify-auth`, {
+      credentials: "include",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(authJSON),
+    });
+
+    if (!verifyResponse.ok) {
+      const errorData = await verifyResponse.json();
+      showModalText(errorData.error || "Verification failed");
+      return;
+    }
+
+    const verifyData = await verifyResponse.json();
+    showModalText(verifyData.verified 
+      ? `Successfully logged in ${email}`
+      : "Failed to log in");
+    
+  } catch (error) {
+    console.error("Login error:", error);
+    showModalText(error.message.includes("base64URLString")
+      ? "Browser error: Try a different browser or device"
+      : "An unexpected error occurred");
   }
-  if (verifyData.verified) {
-    showModalText(`Successfully logged in ${email}`)
-  } else {
-    showModalText(`Failed to log in`)
-  }
-}
-
-function showModalText(text) {
-  modal.querySelector("[data-content]").innerText = text
-  modal.showModal()
 }
