@@ -36,9 +36,7 @@ const closeButton = document.querySelector("[data-close]");
 // ======================
 // Configuration
 // ======================
-const SERVER_URL = import.meta.env.PROD 
-  ? "https://backend-auther.onrender.com" 
-  : "http://localhost:3000";
+const SERVER_URL = "https://backend-auther.onrender.com" ;
 
 // ======================
 // Event Listeners
