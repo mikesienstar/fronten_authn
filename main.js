@@ -1,3 +1,4 @@
+import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
 // ======================
 // Modal Utilities (Export)
 // ======================
